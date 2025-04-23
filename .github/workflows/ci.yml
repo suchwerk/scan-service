@@ -19,8 +19,9 @@ jobs:
           version: '21.0.0'
           java-version: '21'
           distribution: 'graalvm'
-          components: 'native-image'
           cache: 'maven'
 
       - name: Build Native Executable
-        run: ./mvnw -B package -Pnative -Dquarkus.native.container-build=false
+        run: >
+          ./mvnw -B --file pom.xml verify -Pnative
+          -Dquarkus.native.additional-build-args=-H:-UseContainerSupport
