@@ -23,4 +23,4 @@ jobs:
           cache: 'maven'
 
       - name: Build Native Executable
-        run: ./mvnw package -Pnative -Dquarkus.native.container-build=false -B
+        run: ./mvnw -B package -Pnative -Dquarkus.native.container-build=false
