@@ -1,0 +1,156 @@
+{@java.util.List<de.suchwerk.ScanLogEntry> entries}
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <title>Scan Logs</title>
+
+        <style>
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: #f0f2f5;
+                padding: 2rem;
+            }
+
+            h1 {
+                color: #333;
+            }
+
+            button {
+                background-color: #007bff;
+                color: white;
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                margin: 16px;
+            }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                background: white;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            th,
+            td {
+                padding: 0.75rem;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            th {
+                background-color: #f8f9fa;
+            }
+
+            a {
+                display: inline-block;
+                margin-top: 1rem;
+                color: #007bff;
+            }
+
+            h1 {
+                color: #333;
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            p {
+                color: #555;
+                font-size: 1rem;
+                line-height: 1.5;
+                margin-bottom: 1rem;
+            }
+
+            ul {
+                list-style-type: disc;
+                margin-left: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            li {
+                color: #555;
+                font-size: 1rem;
+                line-height: 1.5;
+                margin-bottom: 0.5rem;
+            }
+        </style>
+        <script>
+            async function startScan() {
+                const res = await fetch("/api/scan", { method: "GET" });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "scan.pdf";
+                    a.click();
+                    URL.revokeObjectURL(url);                    
+                    location.reload();
+                } else {
+                    const msg = await res.text();
+                    alert("Scan failed: " + msg);
+                }
+            }
+        </script>
+    </head>
+
+    
+    <body>
+        <h1>Endpoint to Initiate a Scanning Process</h1>
+        <p>This API endpoint allows the user to start a scan operation using a predefined scanner command.</p>
+        <p>The user can optionally specify a filename for the output file via the 'filename' query parameter.</p>
+        <h2>Configuration</h2>
+        <ul>
+            <li><strong>scanner.command:</strong> The base command used to initiate the scan.</li>
+            <li><strong>scanner.filename:</strong> The default filename used if no filename is provided by the user.
+            </li>
+            <li><strong>scanner.output.path:</strong> The default directory path where the output file will be stored if
+                not specified.</li>
+        </ul>
+        <h2>Usage</h2>
+        <p>Send a GET request to <code>'/api/scan'</code> with an optional <code>'filename'</code> query parameter to
+            specify the output file name.</p>
+        <h2>Response</h2>
+        <ul>
+            <li>On success, returns the scanned file as an octet-stream with a 'Content-Disposition' header for file
+                download.</li>
+            <li>On failure, returns a server error with a message indicating the reason for failure.</li>
+        </ul>
+        <h2>Current Configuration</h2>
+    <ul>
+        <li><strong>scanner.command:</strong> {scannerCommand}</li>
+        <li><strong>scanner.filename:</strong> {defaultFilename}</li>
+        <li><strong>scanner.output.path:</strong> {defaultPath}</li>
+    </ul>
+
+
+        <button onclick="startScan()">Start Scan & Download</button>
+        <h1>Scan History</h1>
+        <button onclick="location.reload()">Refresh</button>
+
+        <table border="1">
+            <tr>
+                <th>Time</th>
+                <th>Command</th>
+                <th>Status</th>
+                <th>File</th>
+            </tr>
+            {#for entry in entries}
+            <tr>
+                <td>{entry.timestamp}</td>
+                <td>{entry.command}</td>
+                <td>{entry.status}</td>
+                <td>{entry.file}</td>
+            </tr>
+            {/for}
+        </table>
+
+    </body>
+
+    </html>
