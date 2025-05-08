@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -40,8 +41,6 @@ public class ScannerResource {
     @Inject
     ScanLogger logger;
 
-    @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     /**
      * Endpoint to initiate a scanning process. using a predefined scanner command.
      * 
@@ -61,6 +60,8 @@ public class ScannerResource {
      * - On failure, returns a server error with a message indicating the reason for failure.
      */
     @Path("scan")
+    @GET
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)    
     public Response scan(@QueryParam("filename") Optional<String> filename) {
         try {
             List<String> commandParts = parseCommand(scannerCommand, filename); // this also replaces the filename placeholder
@@ -117,7 +118,7 @@ public class ScannerResource {
         List<String> parts = new ArrayList<>();
         Scanner sc = new Scanner(commandLine);
         while (sc.hasNext())
-            parts.add(sc.next().replaceAll("\\{filename\\}", filename.orElse(defaultFilename)));
+            parts.add(sc.next().replace("{filename}", filename.orElse(defaultFilename)));
         sc.close();
         return parts;
     }
